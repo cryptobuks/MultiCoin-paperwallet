@@ -8,7 +8,7 @@
         <link rel="stylesheet" type="text/css" href="./index_files/wallets.css">
         
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-        <script src="./index_files/jquery-2.2.1.min.js"></script>
+        <script src="./index_files/jquery-3.3.1.min.js"></script>
         <script src="./index_files/jquery.qrcode.min.js"></script>
         <script src="./index_files/moment.min.js"></script>
 		<script src="./index_files/bn.js"></script>
@@ -54,6 +54,39 @@ Display when salt changed." style="display: none; position: absolute;" src="./in
 //test unicode string
 //console.log(Crypto.SHA256('Unicode: 守护村子')); //31293dcebfcc7f417b6ec6af730e1fbb171f3dfb3e9d0cab4c8c905f8937a0d7 //correct;
 
+
+
+//But in this script used SHA256() function, declared in sha256-randomization.js
+/*
+var string = '---BEGIN MULTISTRING---\
+Unicode symbols: 守护村子\
+tabulation symbol: t\
+multistring slash n: \n\
+test CR LF: \r\n\
+test br HTML <br>\
+test another tags <p>p</p><span>span</span>守护村子\
+	test tab symbol before\
+---END STRING---\
+';
+//copy this in console to converter https://username1565.github.io/brainwallet.github.io/#converter
+//from --- at beginning to --- in thie end
+
+	console.log(
+		'string:\n______________________________________________________\n'+string
+		//sha may be: 2cbbcfe61b717f721af540f04cadc14c3af38c7c3a3e1d82e7807460f174efa7
+		//https://username1565.github.io/brainwallet.github.io/#converter
+	+'\n______________________________________________________\n SHA256(string);', SHA256(string)				//THIS CORRECTLY
+		//SHA256(string); 2cbbcfe61b717f721af540f04cadc14c3af38c7c3a3e1d82e7807460f174efa7
+
+	//window.Crypto.SHA256 test:
+	,	'\n Crypto.SHA256(string)', Crypto.SHA256(string)					//9544eea06ae7ad3de97516a3013bee8cd7778b32e8155aeb675af1cce0308e7c - incorrect
+	,	'\n window.Crypto.SHA256(string)', window.Crypto.SHA256(string)		//The same function - incorrect: 9544eea06ae7ad3de97516a3013bee8cd7778b32e8155aeb675af1cce0308e7c
+	);
+//So just will be SHA256
+*/
+
+
+
 //function to repeat strings (need for asterisk's string '******...')
 function repeatStringNumTimes(string, times) {
   var repeatedString = "";
@@ -97,6 +130,13 @@ multistring <br>\
 			passphrase = pass.value+nonce;		//+ nonce
 
 			if(SHA256(passphrase)!==visibleHash.innerHTML){
+				//console.log(Math.random(), Math.random().toString(36).slice(2));
+				/*
+					This returning different values in different browsers.
+					You can test this, using string with fixed number:
+					console.log((0.12345678987654321).toString(36).slice(2));
+				*/
+				
 				var randvalue =
 					//using modified Math.Random()
 					//See more in the comments of code for included script sha256_randomize_Math.Random.js
@@ -104,6 +144,21 @@ multistring <br>\
 					Math.random().toString(36).slice(2)+
 					Math.random().toString(36).slice(2)	//concatenate 3 random values as base36 strings to one generated string (without first two symbols "0.")
 				;
+				
+				
+				/*
+				console.log(
+					'randvalue', randvalue
+				,	'\nnonce', nonce
+				,	'\nrandvalue+nonce', randvalue+nonce
+				,	'\nSHA256(randvalue+nonce)', SHA256(randvalue+nonce)
+				,	'\nwindow.Crypto.SHA256(randvalue+nonce)', window.Crypto.SHA256(randvalue+nonce)
+				,	'\nCrypto.SHA256(randvalue+nonce)', Crypto.SHA256(randvalue+nonce)
+				);
+				//And now, when I see incorrect hashes, here will be used SHA256() from sha256_randomize_Math.Random.js
+				*/
+				
+				
 				var secret_expontent = SHA256(randvalue+nonce);
 		
 				var hidden_passphrase = repeatStringNumTimes("*", randvalue.length);
@@ -126,8 +181,15 @@ multistring <br>\
 				"Generated passphrase: <font id='visiblePassphrase' style='display: inline; color: #2b9118; background-color: #ffffa2'>"+randvalue+"</font>"+
 				"<font id='hiddenPassphrase' style='display: none;'>"+hidden_passphrase+'</font>'+
 				'</font>';
-
-		//console.log('randvalue', randvalue, 'hash = ', document.getElementById("visibleHash").innerHTML);
+				
+				/*
+				console.log(
+						' randvalue:', randvalue
+					, 	'\n visiblePassphrase: ', document.getElementById('visiblePassphrase').innerHTML
+					,	'\n visibleHash', document.getElementById('visibleHash').innerHTML
+				);
+				*/
+				
 			}
 			else{
 				document.getElementById("generated_passphrase").innerHTML = //=''
@@ -150,7 +212,7 @@ multistring <br>\
 			}
 			else{
 				passphrase = passphrase+nonce; //add nonce
-				hash = Crypto.SHA256(passphrase);
+				hash = SHA256(passphrase);
 				document.getElementById("visibleHash").innerHTML = hash; //display hash and save this as HTML
 				document.getElementById("hiddenHash").innerHTML = repeatStringNumTimes("*", hash.length); //display hash and save this as HTML
 				
@@ -283,7 +345,7 @@ for(i=0; i<crypto_data.length; i++){
 			<td>\
 				<input type="checkbox" id="'+input_id+'"'+
 				'onclick="toggle(this, '+(i+1+input_num)+', '+end_row+');"'+
-				'title="Select row '+row_N+'"/>'+
+				'title="Select row '+row_N+'" />'+
 					'<label for="'+'select_row'+row_N+'" title="Select row '+row_N+'" />'+
 						row_N+'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+
 					'</label>'+
@@ -355,8 +417,11 @@ checkbox_table.innerHTML += '</tr>';
         var bytes = Bitcoin.Base58.decode(address);
         var end = bytes.length - 4;
         var hash = bytes.slice(0, end);
-        var checksum = Crypto.SHA256(Crypto.SHA256(hash, {asBytes: true}), {asBytes: true});
-        if (checksum[0] != bytes[end] ||
+        var checksum = Crypto.SHA256(Crypto.SHA256(hash, {asBytes: true}), {asBytes: true}); //Here used Crypto.SHA256, not SHA256('string'). Values, as bytes
+		
+		//console.log(hash);	//bytes you can see here
+		
+		if (checksum[0] != bytes[end] ||
             checksum[1] != bytes[end+1] ||
             checksum[2] != bytes[end+2] ||
             checksum[3] != bytes[end+3]){
@@ -438,14 +503,14 @@ checkbox_table.innerHTML += '</tr>';
 		//console.log(hash);
 	//gen priv and addr
 		if(hash===null){
-			var randvalu = Math.random().toString(36).slice(2)+//base36 encoded values without '0.'
-				Math.random().toString(36).slice(2)+//concatenate as string.
-				Math.random().toString(36).slice(2);//3 times
+			var randvalue = Math.random().toString(36).slice(2)+	//base36 encoded values without '0.'
+				Math.random().toString(36).slice(2)+				//concatenate as string.
+				Math.random().toString(36).slice(2);				//3 times
 				
-			hash = Crypto.SHA256(
-				randvalu
+			hash = SHA256(
+				randvalue
 			);
-			//console.log('randvalu', randvalu, 'hash = ', hash);
+			//console.log('randvalue', randvalue, 'hash = ', hash);
 			document.getElementById("visibleHash").innerHTML = hash;
 		}
 		var payload = Crypto.util.hexToBytes(hash);
