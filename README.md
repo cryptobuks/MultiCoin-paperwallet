@@ -18,6 +18,7 @@
 - Compressed keys and addresses - added (using [bitcoinjs-min.js](https://github.com/username1565/MultiCoin-paperwallet/index_files/bitcoinjs-min.js))
 
 - Client-side searching (for addresses and private keys) - added.
+
 Now you can copy and paste any address or private key in the input field,
 and see coins exists in array. This working on client-side,
 and searching by public key prefix and private key prefix
