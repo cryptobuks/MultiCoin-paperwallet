@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<!-- saved from url=(0039)https://multiexplorer.com/paper_wallet/ -->
+<!-- And modified...-->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>MultiExplorer</title>
+		
+		<link rel="stylesheet" type="text/css" href="./index_files/MultiExplorer.css">
+        <link rel="stylesheet" type="text/css" href="./index_files/wallets.css">
+        
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="./index_files/jquery-2.2.1.min.js"></script>
+        <script src="./index_files/jquery.qrcode.min.js"></script>
+        <script src="./index_files/moment.min.js"></script>
+		<script src="./index_files/bn.js"></script>
+		<script src="./index_files/bitcoinjs-min.js"></script>
+
+		<script src="./index_files/COINS_ARRAY.js"></script>
+
+	</head>
+    <body>
+		<div id="header">
+            <div style="margin: 20px 0px 20px 10px;">
+                <input id="address_lookup" class="address" name="address" type="text" size="60" value="" placeholder="Enter any cryptocoin address or private key."
+				title = "This searching working on client-side, and will do search coin in array,
+and show you info about prefixes and corresponding coins exists in array.">
+                <input id="address_lookup_button" type="submit" value="Go" onclick="search_coin();">
+				<!--next block here, to display salt info inline.-->
+
+<!-- visualization randomization -->
+	<!-- gif for mouse cursor with random coordinates -->
+		<img id="cursor" title="eventListener onmousemove indication.
+Display when salt changed." style="display: none; position: absolute;" src="./index_files/static/spin.gif"></img>
+
+		<font title="See more info in the source code sha256_randomize_Math.Random.js">
+			Partial value of salt for modified Math.random() function:
+			<div id="partial_salt_value" style="display: inline; "></div>
+		</font>
+<!--end visualization-->
+
+<script src="./index_files/sha256_randomize_Math.Random.js"></script>
+				
+				<div id="address_info"></div>
+                <!-- <a href="/block">Block Data</a> 
+                <a href="./index_files/MultiExplorer.htm">Paper Wallet</a>-->
+           </div>
+		</div>
+
+        <script>
+
+			
+//sha-256 function already exists in bitcoinjs-min.js Crypto
+//and can be called as Crypto.SHA256('string_unicode_supporting')
+
+//test unicode string
+//console.log(Crypto.SHA256('Unicode: 守护村子')); //31293dcebfcc7f417b6ec6af730e1fbb171f3dfb3e9d0cab4c8c905f8937a0d7 //correct;
+
+//function to repeat strings (need for asterisk's string '******...')
+function repeatStringNumTimes(string, times) {
+  var repeatedString = "";
+  while (times > 0) {
+    repeatedString += string;
+    times--;
+  }
+  return repeatedString;
+}
+//run
+//console.log(repeatStringNumTimes("*", 3));
+
+
+
+//nonce for randomize hashes
+
+//This saving cryptographic strength for simply and easy to remember passphrases
+//and make bruteforce so hard.
+
+//Reccommend to change this value, and save this
+//to do client-side generation keys and addresses, generated from simple passwords.
+
+var nonce =
+'your \
+	own\
+____nonce____\
+can \r\n\
+be \n\
+multistring <br>\
+';
+
+	//in next function using sha256(passphrase+nonce).
+	function hash(passphrase) {
+		if(typeof passphrase==='undefined'){// || $('#pass').hasClass('is_generated')){//check hash
+			
+			var hash = document.getElementById("hash");
+			var pass = document.getElementById('Passphrase');
+			
+			var visibleHash = document.getElementById("visibleHash");
+
+			passphrase = pass.value+nonce;		//+ nonce
+
+			if(SHA256(passphrase)!==visibleHash.innerHTML){
+				var randvalue =
+					//using modified Math.Random()
+					//See more in the comments of code for included script sha256_randomize_Math.Random.js
+					Math.random().toString(36).slice(2)+
+					Math.random().toString(36).slice(2)+
+					Math.random().toString(36).slice(2)	//concatenate 3 random values as base36 strings to one generated string (without first two symbols "0.")
+				;
+				var secret_expontent = SHA256(randvalue+nonce);
+		
+				var hidden_passphrase = repeatStringNumTimes("*", randvalue.length);
+				var hidden_secret_expontent = repeatStringNumTimes("*", secret_expontent.length);
+
+				hash.innerHTML =
+				'<font id="block" onMouseOver="show_sidebar()" onMouseOut="hide_sidebar()">'+
+				'Hash: '+
+				'<font id="visibleHash" style="display: inline color: #2b9118; background-color: #ffffa2">'+secret_expontent+'</font>'+
+				'<font id="hiddenHash" style="display: none">'+hidden_secret_expontent+'</font>'+
+				'</font>';
+				
+				hash.classList.add("is_generated");
+				pass.classList.add("is_generated");
+				document.getElementById('Passphrase').value = randvalue;
+				document.getElementById('Passphrase').type = "text";
+				
+				document.getElementById("generated_passphrase").innerHTML =
+				'<font id="block" onMouseOver="show_sidebar()" onMouseOut="hide_sidebar()">'+
+				"Generated passphrase: <font id='visiblePassphrase' style='display: inline; color: #2b9118; background-color: #ffffa2'>"+randvalue+"</font>"+
+				"<font id='hiddenPassphrase' style='display: none;'>"+hidden_passphrase+'</font>'+
+				'</font>';
+
+		//console.log('randvalue', randvalue, 'hash = ', document.getElementById("visibleHash").innerHTML);
+			}
+			else{
+				document.getElementById("generated_passphrase").innerHTML = //=''
+				'<font id="block2" onMouseOver="show_sidebar()" onMouseOut="hide_sidebar()">'+
+				'<font id="visiblePassphrase" style="display: inline;" style="display: inline; color: #2b9118; background-color: #ffffa2"></font>'+
+				'<font id="hiddenPassphrase" style="display: none;"></font>'+
+				'</font>';
+				
+				if($('#hash').hasClass('is_generated')){
+					hash.classList.remove('is_generated');
+					hash.removeAttribute("class")
+				}
+			}
+		}else{ //or generate hash
+			if(passphrase===''){ //passphrase is empty
+				document.getElementById("visibleHash").innerHTML = 'No hash, empty string. Generate paperwallets randomly...';
+				document.getElementById("hiddenHash").innerHTML = 'No hash, empty string. Generate paperwallets randomly...';
+				document.getElementById("visiblePassphrase").innerHTML = 'No passphrase specified. Click on the buttons to generate this.';
+				document.getElementById("hiddenPassphrase").innerHTML = 'No passphrase specified. Click on the buttons to generate this.';
+			}
+			else{
+				passphrase = passphrase+nonce; //add nonce
+				hash = Crypto.SHA256(passphrase);
+				document.getElementById("visibleHash").innerHTML = hash; //display hash and save this as HTML
+				document.getElementById("hiddenHash").innerHTML = repeatStringNumTimes("*", hash.length); //display hash and save this as HTML
+				
+				
+				document.getElementById("generated_passphrase").innerHTML = //= '';
+				'<font id="block2" onMouseOver="show_sidebar()" onMouseOut="hide_sidebar()">'+
+				'<font id="visiblePassphrase" style="display: inline;"></font>'+
+				'<font id="hiddenPassphrase" style="display: none;"></font>'+
+				'</font>';
+			}
+		}
+	}
+	
+	
+	function show_sidebar(){
+		document.getElementById('Passphrase').type = "text";
+		
+		document.getElementById("visiblePassphrase").style.display = "inline";
+		document.getElementById("hiddenPassphrase").style.display = "none";
+		
+		document.getElementById("visibleHash").style.display = "inline";
+		document.getElementById("hiddenHash").style.display = "none";
+		
+		
+	}
+
+	function hide_sidebar(){
+		document.getElementById('Passphrase').type = "password";
+		
+		document.getElementById("visiblePassphrase").style.display = "none";
+		document.getElementById("hiddenPassphrase").style.display = "inline";
+		
+		document.getElementById("visibleHash").style.display = "none";
+		document.getElementById("hiddenHash").style.display = "inline";
+	}
+        </script>
+
+        
+  <section id="generator">
+  <h2>Paper Wallet Generator</h2>
+  Select which currencies you want included in your paper wallet:<br><br>
+  <table id="checkbox_table" style="border: 1; text-align: left; margin: 0 auto 0 auto;">
+  </table>
+  
+  <br><br>
+	<font id="block0" onMouseOver="show_sidebar()" onMouseOut="hide_sidebar()">
+	Passphrase:
+	<input type="text" id="Passphrase" size="100" placeholder="Type passphrase to get static value, or leave this field empty to generate hash."
+title="Type passphrase to get brain-wallets as paperwallet (sha256 hash using as priv),
+or leave this field empty to generate this data randomly."
+value="123" oninput="hash(this.value);"/>
+	</font>
+	<button onclick="
+		document.getElementById('Passphrase').value =
+		document.getElementById('visibleHash').innerHTML =
+		document.getElementById('hiddenHash').innerHTML =
+		document.getElementById('visiblePassphrase').innerHTML = 
+		document.getElementById('hiddenPassphrase').innerHTML = 
+		'';
+	"
+	title="Just clear this field.">Clear</button>
+	<br>
+	<br>
+	<b>
+		<div id="generated_passphrase" title="Generated passphrase.
+Double-click to highlight text and copy values.">
+			<font id="block" onMouseOver="show_sidebar()" onMouseOut="hide_sidebar()">
+				<font id="visiblePassphrase" style="display: inline;"></font>
+				<font id="hiddenPassphrase" style="display: none;"></font>
+			</font>
+		</div>
+	
+		<div id="hash" title="SHA256 hash(passphrase + nonce).
+This is your private key hex (secret exponent).
+This value will be converted to different WIF private keys for different coins.">
+			<font id="block" onMouseOver="show_sidebar()" onMouseOut="hide_sidebar()">
+				Hash:
+				<font id="visibleHash" style="display: inline; color: #2b9118; background-color: #ffffa2"></font>
+				<font id="hiddenHash" style="display: none;">No hash, empty string. Generate paperwallets randomly...</font>
+			</font><!--END FONT id="block"-->
+		</div>
+	</b>
+	<button id="generate" title="Generate wallets, using hash from pass, as private key.
+Move your mouse to automatically change salt for Math.random()">Generate!</button>
+	<button id="regenerate" onclick="document.getElementById('Passphrase').value = ''; document.getElementById('generate').click()"
+	title="To generate random pass and hash, field 'pass' must be empty...
+Click to clear this field and regenerate pass and hash and regenerate wallets, then.">Regenerate!</button>
+
+</section>
+
+<div id="wallets" style="">
+</div>
+
+<script src="./index_files/altcore-lib.min.js"></script>
+<script>
+	hash(document.getElementById('Passphrase').value); //calculate hash from passprase, if this was been specified as default...
+	
+    var bitcore = require('bitcore-lib');
+
+
+function toggle(source, start, end) {
+    var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    for (var i = start; i <= end; i++) {
+        if (checkboxes[i] != source){
+            checkboxes[i].checked = source.checked;
+		}
+    }
+}
+
+var checkbox_table = document.getElementById("checkbox_table");
+var coin_parameters;
+checkbox_table.innerHTML += '<tr><th for="select_all"><input type="checkbox" id="select_all" onclick="toggle(this, 0, '+(crypto_data.length+Math.floor((crypto_data.length/10))+(crypto_data.length%10>0))+');" title="All?"/><label for="select_all" title="All?">Select?</label></th><th colspan="10" style="text-align: center;">Select coins...</th><tr>'
+var input_num = 0;
+var row, end_row;
+
+for(i=0; i<crypto_data.length; i++){
+	if(i%10==0){
+		if((input_num+1)>Math.floor(crypto_data.length/10)){
+			end_row = i+1+input_num+(crypto_data.length%10);
+		}
+		else{
+			end_row = i+11+input_num;
+		}
+		var row_N = (input_num+1); //row number = ((i/10)+1)
+		var tr_id = 'row'+row_N;
+		var input_id = 'select_row'+row_N;
+		
+		checkbox_table.innerHTML += '\
+		</tr><tr class="checkbox" id="'+tr_id+'">\
+			<td>\
+				<input type="checkbox" id="'+input_id+'"'+
+				'onclick="toggle(this, '+(i+1+input_num)+', '+end_row+');"'+
+				'title="Select row '+row_N+'"/>'+
+					'<label for="'+'select_row'+row_N+'" title="Select row '+row_N+'" />'+
+						row_N+'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+
+					'</label>'+
+				'</td>';
+		input_num++;
+	}
+	row = document.getElementById('row'+input_num);
+
+	coin_parameters = crypto_data[i];
+	row.innerHTML += '<td><input type="checkbox" name="coin" id="'+i+'" value="'+coin_parameters.code+'" title="Select '+coin_parameters.name+'" /><label for="'+i+'" title="Select '+coin_parameters.name+'" />'+coin_parameters.name+'</label></td>';
+	if (coin_parameters.my===true){
+		document.getElementById(i).setAttribute('checked', true);
+	}	
+}
+for(li=0; li<(10-(crypto_data.length%10))%10; li++){
+	row.innerHTML += '<td></td>';
+}
+checkbox_table.innerHTML += '</tr>';	
+	
+	
+    $.each(crypto_data, function(i, data) {
+        var network = {};
+        network.alias = data['code'];
+        network.name = data['name'];
+        network.pubkeyhash = data['address_byte'];
+        network.privatekey = data['private_key_prefix'];
+
+        if(data['code'] != 'btc') {
+            bitcore.Networks.add(network);
+        }
+    });
+
+    function get_coin_data(coin) {
+        ret = undefined;
+        $.each(crypto_data, function(i, data){
+            if(data['code'] == coin) {
+                ret = data
+                return false;
+            }
+        });
+        return ret
+    }
+	
+	//get compressed or uncompressed public key from Elliptic Curve point
+    function getEncoded(pt, compressed) {
+       var x = pt.getX().toBigInteger();
+       var y = pt.getY().toBigInteger();
+       var enc = integerToBytes(x, 32);
+       if (compressed) {
+         if (y.isEven()) {
+           enc.unshift(0x02);
+         } else {
+           enc.unshift(0x03);
+         }
+       } else {
+         enc.unshift(0x04);
+         enc = enc.concat(integerToBytes(y, 32));
+       }
+       return enc;
+    }
+	
+	function isBase58(str) {
+        return !/[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+/.test(str);
+    }
+
+	//get bytes from WIF, with checking base58 encoding.
+    function parseBase58Check(address) {
+		if(!isBase58(address)){return 'String not have base58 encoding.'}
+        var bytes = Bitcoin.Base58.decode(address);
+        var end = bytes.length - 4;
+        var hash = bytes.slice(0, end);
+        var checksum = Crypto.SHA256(Crypto.SHA256(hash, {asBytes: true}), {asBytes: true});
+        if (checksum[0] != bytes[end] ||
+            checksum[1] != bytes[end+1] ||
+            checksum[2] != bytes[end+2] ||
+            checksum[3] != bytes[end+3]){
+			    return "Wrong Base58Check checksum.";
+		}
+        var version = hash.shift();
+        return [version, hash];
+    }
+
+	//function to search coins in array, by address or private key.
+	function search_coin(){
+		var coin_address = document.getElementById('address_lookup').value;
+		var result_div = document.getElementById('address_info');
+		result_div.innerHTML = '';
+	
+		var res = parseBase58Check(coin_address);
+		if(res==='Wrong Base58Check checksum.' || res==='String not have base58 encoding.'){
+			result_div.innerHTML = res+' This is not correct address or private key. '
+		}
+		var prefix_byte = res[0];
+
+		var priv, addr;
+		var founded_coins = [];
+		//var prefix_byte = Crypto.util.bytesToHex([res[0]]);
+		var bytes = res[1];
+		if(bytes.length>=32){//this is private key
+			priv = true;
+			result_div.innerHTML += 'Private key. ';
+			if(bytes.length===33 && bytes[32]===1){
+				result_div.innerHTML += 'Compressed. ';
+			}
+			else if(bytes.length===32 && bytes[32]!==1){
+				result_div.innerHTML += 'Uncompressed. ';
+			}else{
+				result_div.innerHTML += "Unknown length and cann't understand is compressed or uncompressed. ";
+			}
+		
+			for(i=0; i<crypto_data.length; i++){
+				if(crypto_data[i].private_key_prefix===prefix_byte){founded_coins.push('['+i+'] '+crypto_data[i].name);}
+			}
+		}
+
+		if(bytes.length===20){
+			addr = true;
+			result_div.innerHTML += 'Address. ';
+		
+			for(j=0; j<crypto_data.length; j++){
+				if(crypto_data[j]["address_byte"]===prefix_byte){founded_coins.push('['+j+'] '+crypto_data[j].name);}
+			}
+		}
+		result_div.innerHTML += 'Prefix_byte: <b title="decimal value">'+prefix_byte+'</b> '+
+		'(<b title="hexadecimal value">0x'+Crypto.util.bytesToHex([prefix_byte])+'</b>)'+
+		'<br> Founded coins with '+((addr) ? 'address_byte' : (priv) ? 'private_key_prefix' : 'undefined_byte')+
+		' equals to this prefix_byte <b title="decimal value as specified in array">('+prefix_byte+')</b>: '+
+		'<div style="display: inline; background-color: #ffffa2" title="(array) crypto_data { [index] coin_name, [index2] coin_name2, etc... }">{'+founded_coins.join(', ')+'}.';
+	
+/*
+	console.log(
+			'res', res
+		, 	'prefix_byte', prefix_byte
+		,	'bytes', bytes
+		,	'bytes.length', bytes.length
+	);
+*/
+	//addresses and priv for test	
+	//Vertcoin:
+	//address: VnLEnG7VV94wiwtbHCeYDP2V4AfMRX2tqd
+	//priv: L3F5GxwCz5GhsaXWkorwad5arVowFyb6fubgYowXvbtept51hc7w
+
+	//1337 coin
+	//address: LZ2Putsy2Hhfhu5vaSXx7NJHxBgBzX9at1
+	//priv: 6u8SyyYBC5AfQCbZ5BhLr6pJmnQgdwGbKpwrHC8voUzVyzFTgr6
+}
+	
+	
+	
+	//generate brainwallet with specified hash
+	function generate_priv_addr(hash, compressed, PUBLIC_KEY_VERSION, PRIVATE_KEY_VERSION){
+		//console.log(hash);
+	//gen priv and addr
+		if(hash===null){
+			var randvalu = Math.random().toString(36).slice(2)+//base36 encoded values without '0.'
+				Math.random().toString(36).slice(2)+//concatenate as string.
+				Math.random().toString(36).slice(2);//3 times
+				
+			hash = Crypto.SHA256(
+				randvalu
+			);
+			//console.log('randvalu', randvalu, 'hash = ', hash);
+			document.getElementById("visibleHash").innerHTML = hash;
+		}
+		var payload = Crypto.util.hexToBytes(hash);
+		if (compressed){
+			payload.push(0x01);
+		}
+		var sec = new Bitcoin.Address(payload);
+        sec.version = PRIVATE_KEY_VERSION;				//altcoin private key prefix
+
+		//console.log('sec.toString()', sec.toString());
+		var hex_priv = parseBase58Check(sec.toString());
+		//console.log('hex_priv', hex_priv);
+		
+		//console.log('hash from priv WIF: ', hex_priv, 'version', hex_priv[0], 'priv_bytes', hex_priv[1]);
+		
+		//var hex_bytes = Crypto.util.hexToBytes(hash);	//hash as byte code integers array			hex -> to bytes
+		//var hash = Crypto.util.bytesToHex(payload);
+		var hash_from_priv_WIF = Crypto.util.bytesToHex(hex_priv[1]);
+		//console.log('\n\n 01 byte in the end for if key is compressed. \n hash from priv WIF: ', hash_from_priv_WIF);
+		
+
+		//if(compressed){
+		//	hex_bytes.push(0x01)
+		//}
+		var hash_priv_bytes = Crypto.util.hexToBytes(hash);	//hash as bytes
+		var eckey = new Bitcoin.ECKey(hash_priv_bytes);			//eckey										//hash is hex string
+		
+		/*
+		console.log(
+			//'hex_bytes', hex_bytes,
+			'\n hash', hash_priv_bytes,
+			'\n eckey', eckey
+		);
+		*/
+
+		try {
+            var curve = getSECCurveByName("secp256k1");
+            gen_pt = curve.getG().multiply(eckey.priv);
+			//console.log('gen_pt', gen_pt);
+			//eckey.pub = getEncoded(gen_pt);				//uncompressed
+			eckey.pub = getEncoded(gen_pt, compressed);		//compressed if compressed true
+			//console.log('eckey.pub', eckey.pub);
+            
+			eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(eckey.pub);
+			addr = new Bitcoin.Address(eckey.getPubKeyHash());
+            addr.version = PUBLIC_KEY_VERSION;
+			//console.log('eckey.pub', Crypto.util.bytesToHex(eckey.pub), 'addr.toString()', addr.toString());
+			
+        } catch (err) {
+            console.info(err, 'Invalid secret exponent (must be non-zero value);');
+            return;
+        }
+		
+		
+		var hash160 = eckey.getPubKeyHash();
+		var h160 = Crypto.util.bytesToHex(hash160); //as hex
+		var addr = new Bitcoin.Address(hash160);
+		addr.version = PUBLIC_KEY_VERSION;
+		
+		/*
+		//test display values
+		console.log(
+			'hash160', hash160,
+			'\n hash160 hex ', Crypto.util.bytesToHex(hash160),
+			'\n h160', h160,
+			'\n addr', addr,
+			'\n addr.toString()', addr.toString()
+		);
+		*/
+		//console.log('addr.toString()', addr.toString());
+		
+		return [sec.toString(), addr.toString()];
+		
+	}
+	
+	function getpriv_addr(hash, coin){
+		
+		//check is compressed?
+		var coin_id;
+		
+		for(i=0; i<crypto_data.length; i++){
+			if(crypto_data[i]["code"]===coin){coin_id = i;} //search coin code and copy index
+		}
+		
+		var compressed = crypto_data[coin_id]["compressed"]; 					//get compressed parameter, true or false
+		var PUBLIC_KEY_VERSION = crypto_data[coin_id]["address_byte"]; 			//get public key byte
+		var PRIVATE_KEY_VERSION = crypto_data[coin_id]["private_key_prefix"]; 	//get private key byte
+
+		return generate_priv_addr(hash, compressed, PUBLIC_KEY_VERSION, PRIVATE_KEY_VERSION);
+	}
+
+    $("#generate").click(function() {
+		if(document.getElementById('Passphrase').value===''){ //if passphrase field empty
+			hash(); //regenerate pass and hash
+		}
+		else{//if passphrase field filled
+			hash(document.getElementById('Passphrase').value);	//check is hash in this field + nonce, corresponding sha256 from (passphrase+nonce) or not;
+		}//then generate wallets
+		
+        $("#wallets").empty();
+
+        var selected = [];
+        $("input[name=coin]:checked").each(function(){
+           var coin = $(this).val();
+           selected.push(coin)
+        });
+
+        $.each(selected, function(i, coin) {
+            if(coin == 'btc') {
+              //coin = 'livenet'
+            }
+			//old generate
+            //var priv = bitcore.PrivateKey(null, coin)
+
+			//var passphrase = 'my passphrase';
+			//sha256 function added before
+			//var hash = SHA256(passphrase);
+			
+			var HTML_hash = document.getElementById("visibleHash").innerHTML;
+			//console.log('HTML_hash', HTML_hash);
+			
+			if(HTML_hash==='No hash, empty string. Generate paperwallets randomly...'){ //if default value - passphrase is empty
+				//var priv = bitcore.PrivateKey(null, coin); //generate private key
+				var paperwallet = getpriv_addr(null, coin);
+			}
+			else{//else, passphrase was been specified. Use hash as private key.
+				
+				//null was been replaced to HTML_hash. This may be hex string.
+				//to using your own nonce see "function hash(passphrase)"
+				//var priv = bitcore.PrivateKey(HTML_hash, coin);
+				var paperwallet = getpriv_addr(HTML_hash, coin);
+			}
+
+			//var wif = priv.toWIF();
+            //var address = priv.toAddress(coin).toString();
+			
+			var wif = paperwallet[0];			//private key WIF
+			var address = paperwallet[1];		//Address
+			
+			
+			//before using - check this by commands "importprivkey PRIVATE_KEY" and "dumpprivkey ADDRESS"
+			//in console of your qt.exe program or another client
+			//check and compare prefixes of this values there,
+			//BECAUSE YOU CAN LOST YOUR COINS IF THIS DATA WILL BE INCORRECT.
+
+            if(coin == 'livenet') {
+              //coin = 'btc'
+            }
+
+            var data = get_coin_data(coin);
+
+            coin = coin.toUpperCase();
+
+            var wallet = render_template({
+                name: data['name'],
+                logo: data['logo'],
+                wif: wif,
+                address: address,
+                code: coin
+            });
+
+            $('#wallets').append(wallet);
+            $("#" + coin + " .pub.qr").qrcode({render: 'canvas', width: 112, height: 112, text: address});
+            $("#" + coin + " .priv.qr").qrcode({render: 'canvas', width: 112, height: 112, text: wif});
+        });
+        $("#wallets").show();
+    });
+
+    function render_template(context) {
+        var contents = $("#paper_wallet_template").html();
+        
+        contents = contents.replace(/{{ name }}/g, context.name);
+        contents = contents.replace(/{{ logo }}/g, context.logo);
+        contents = contents.replace(/{{ address }}/g, context.address);
+        contents = contents.replace(/{{ wif }}/g, context.wif);
+        contents = contents.replace(/{{ code }}/g, context.code);
+        
+        return contents
+    }
+</script>
+
+
+<script type="text/template" id="paper_wallet_template">
+    <table class="wide" id="{{ code }}">
+        <tr class="no_border">
+            <td class="no_border">
+                <div class="pub qr" title="Address QR-code"></div>
+            </td>
+            <td class="no_border">
+                <div class="title">
+                    {{ code }} - {{ name }}<br>
+                    <img src="./index_files/static/{{ logo }}" style="width: 50px; height: 50px" title="To make icons 100x100 you can using photo resizer, like this: http://picasion.com/create-avatar/">
+                </div>
+                <div class="pub words">&larr; Address (receive): {{ address }} </div>
+                <div class="priv words">Private Key (spend): {{ wif }} &rarr;</div>
+            </td>
+            <td class="no_border">
+                <div class="priv qr" style="width: 112px; height: 112px" title="Private key QR-code."></div>
+            </td>
+        </tr>
+    </table>
+</script>
+
+
+
+        <section id="footer">
+        </section>
+</body></html>

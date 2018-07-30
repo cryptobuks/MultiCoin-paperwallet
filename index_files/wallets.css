@@ -1,0 +1,64 @@
+@media print {
+        .wide {
+            width: 100%;
+            font-size: small;
+        }
+
+        #generator, #header, #footer {
+            display: none;
+        }
+        .wide {
+            page-break-inside: avoid;
+        }
+    }
+
+    @media screen {
+        .wide {
+            width: 80%;
+            margin: 5px auto 5px auto;
+        }
+    }
+
+    .wide {
+        border: 1px solid black;
+        padding: 3px;
+        overflow: hidden;
+        margin-top: 3px;
+    }
+	
+	.no_border {
+        border: none;
+    }
+
+    .wide .priv {
+        float: right;
+        border: 0px solid red;
+    }
+
+    .wide .pub {
+        float: left;
+        border: 0px solid blue;
+        clear: left;
+    }
+
+    .words {
+        padding-left: 3px;
+        padding-right: 3px;
+    }
+
+    .title {
+        font-size: large;
+        width: 100%;
+        text-align: center;
+    }
+
+    #generate {
+        padding: 5px;
+        background-color: #45ff45;
+        font-size: large;
+    }
+	#regenerate {
+        padding: 5px;
+        background-color: #45ff45;
+        font-size: large;
+    }
