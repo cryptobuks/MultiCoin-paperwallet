@@ -7,7 +7,7 @@
 
 - This page was been modified.
 
-- All coins settings in there in ./index_files/COINS_ARRAY.js
+- All coins settings in there in [./index_files/COINS_ARRAY.js](https://github.com/username1565/MultiCoin-paperwallet/index_files/COINS_ARRAY.js)
 
 - Dinamyc table generator for choose Bitcoin-based altcoins - added, inside [index.html](https://github.com/username1565/MultiCoin-paperwallet/index.html)
 
@@ -15,6 +15,6 @@
 
 - Descriptions added in title for HTML-elements.
 
-- Compressed keys and addresses - added (using bitcoinjs-min.js)
+- Compressed keys and addresses - added (using [bitcoinjs-min.js](https://github.com/username1565/MultiCoin-paperwallet/index_files/bitcoinjs-min.js))
 
 Source code - [HERE.](https://github.com/username1565/MultiCoin-paperwallet)
