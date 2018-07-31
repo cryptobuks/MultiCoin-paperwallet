@@ -137,6 +137,11 @@ multistring <br>\
 					console.log((0.12345678987654321).toString(36).slice(2));
 				*/
 				
+				//random 75 base36 symbols in one string, using 1 call Math.random()
+				var len = 75;/*<--String Length ...*/for(var s = "", rem = 100000000, n = Math.random()*10*rem; s.length < len;){rem=10*rem%n; s+= (rem%10!==0)?rem.toString(36).replace(".", "").substr(0, len-s.length):"";}//document.write("<br>", 's.length: ', s.length, 's: ', s);
+				var randvalue = s;
+			
+				/*
 				var randvalue =
 					//using modified Math.Random()
 					//See more in the comments of code for included script sha256_randomize_Math.Random.js
@@ -144,7 +149,7 @@ multistring <br>\
 					Math.random().toString(36).slice(2)+
 					Math.random().toString(36).slice(2)	//concatenate 3 random values as base36 strings to one generated string (without first two symbols "0.")
 				;
-				
+				*/
 				
 				/*
 				console.log(
@@ -503,10 +508,17 @@ checkbox_table.innerHTML += '</tr>';
 		//console.log(hash);
 	//gen priv and addr
 		if(hash===null){
+			
+			//random 75 base36 symbols in one string, using 1 call Math.random()
+			var len = 75;/*<--String Length ...*/for(var s = "", rem = 100000000, n = Math.random()*10*rem; s.length < len;){rem=10*rem%n; s+= (rem%10!==0)?rem.toString(36).replace(".", "").substr(0, len-s.length):"";}//document.write("<br>", 's.length: ', s.length, 's: ', s);
+			var randvalue = s;
+			
+			/*
 			var randvalue = Math.random().toString(36).slice(2)+	//base36 encoded values without '0.'
 				Math.random().toString(36).slice(2)+				//concatenate as string.
 				Math.random().toString(36).slice(2);				//3 times
-				
+			*/
+			
 			hash = SHA256(
 				randvalue
 			);
