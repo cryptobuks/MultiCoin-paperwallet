@@ -78,6 +78,11 @@ var crypto_data = [
 	{"my": false, "compressed": false, "address_byte": 23, "private_key_prefix": 151, "code": "xpm", "name": "Primecoin", "logo": "logos/xpm-logo_100x100.png"},
 	{"my": false, "compressed": false, "address_byte": 58, "private_key_prefix": 186, "code": "qrk", "name": "Quark", "logo": "logos/qrk-logo_100x100.png"},
 	{"my": false, "compressed": false, "address_byte": 61, "private_key_prefix": 189, "code": "rdd", "name": "Reddcoin", "logo": "logos/rdd-logo_100x100.png"},
+	{"my": false, "compressed": true, "address_byte": 0x26, "private_key_prefix": 0xa6, "code": "GEERT", "name": "GeertCoin", "logo": "logos/GEERT-logo_100x100.png"},
+	{"my": false, "compressed": true, "address_byte": 0x3f, "private_key_prefix": 0xbf, "code": "XRBC", "name": "ReddByteCoin", "logo": "logos/XRBC-logo_100x100.png"},
+	{"my": false, "compressed": false, "address_byte": 0x1a, "private_key_prefix": 0x9a, "code": "SAND", "name": "BeachCoin", "logo": "logos/SAND-logo_100x100.png"},
+	{"my": false, "compressed": true, "address_byte": 0x64, "private_key_prefix": 0x17, "code": "BHD", "name": "Bithold", "logo": "logos/BHD-logo_100x100.png"},
+	
 /*	{"my": false, "compressed": false, "address_byte": 60, "private_key_prefix": 128, "code": "ric", "name": "Riecoin", "logo": "logos/ric-logo_100x100.png"},
 	{"my": false, "compressed": false, "address_byte": 60, "private_key_prefix": 188, "code": "rby", "name": "Rubycoin", "logo": "logos/rby-logo_100x100.png"},
 	{"my": false, "compressed": false, "address_byte": 63, "private_key_prefix": 191, "code": "song", "name": "SongCoin", "logo": "logos/song-logo_100x100.png"},
