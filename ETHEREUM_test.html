@@ -1,0 +1,43 @@
+<div>See console.log(F12 button)</div>
+<script src="./index_files/web3-eth-accounts.js">//generate ethereum address from the same hex, corresponding bitcoin priv WIF</script>
+
+<script>
+
+	//_______________________________________________________________________
+	//generate random ETH priv and address.
+	var account = new Web3EthAccounts();
+	var keyPair = account.create();
+
+	//console.log(randomHex(12).substr(2).padStart(24, '0'));
+	var pubKey = JSON.parse(JSON.stringify(keyPair.address));
+	var privKey = JSON.parse(JSON.stringify(keyPair.privateKey));
+
+	console.log(
+				" random ethereum address:"+'\n'+
+				' public (address): '+pubKey+'\n'+
+				' secret (priv): '+privKey
+	);
+	
+	//_______________________________________________________________________
+	//generate static address from hex
+	var hex = '77a0aaa2c2534e38f22a5658ed95833df6a928e0fce24a0747761b81af7c1c60';
+	var account = new Web3EthAccounts();
+				
+	var priv0x = '0x0000000000000000000000000000000000000000000000000000000000000000';
+	var priv_keys_i_length = hex.length;
+	var start_position = 2+64-priv_keys_i_length;
+	var nulled_0x_priv = '';
+	
+	nulled_0x_priv = priv0x.substring(0, start_position)+hex;
+					
+	var keyPair = account.privateKeyToAccount(nulled_0x_priv);
+	var pubKey = JSON.parse(JSON.stringify(keyPair.address));
+	var privKey = JSON.parse(JSON.stringify(keyPair.privateKey));
+
+	console.log(
+		"\n\n ETHEREUM:"
+		+"\n priv (hex inside): "+privKey
+		+"\n address: "+pubKey
+		+"\n_________________________________________"
+	);
+</script>

@@ -3,6 +3,12 @@
 //You can comment and uncomment any data in array
 	
 var crypto_data = [
+	//Ethereum
+	{"my": true, "compressed": false, "address_byte": 0, "private_key_prefix": 0, "code": "ETH", "name": "Ethereum", "logo": "logos/ethereum-logo_100x100.png"},
+	
+	//______________________________________________________________________________________________________________________
+	//bitcoin-based - altcoins array
+	
 	//checked by default, priv and addr is compressed?, address_previx_byte, priv_prefix_byte, ticker, name, relative logo-pathway to the folder static\logos\100x100
 	
 	//to get WIF private keys, beginning from symbols [K,L] - set default bitcoin private_key_prefix as default value 128 (byte 0x80)

@@ -6,15 +6,23 @@
 		
 		<link rel="stylesheet" type="text/css" href="./index_files/MultiExplorer.css">
         <link rel="stylesheet" type="text/css" href="./index_files/wallets.css">
+		<link rel="stylesheet" type="text/css" href="./index_files/zoom_qr_code.css">
+		
         
 		<meta name="viewport" content="width=device-width, initial-scale=1">
         <script src="./index_files/jquery-3.3.1.min.js"></script>
         <script src="./index_files/jquery.qrcode.min.js"></script>
+		<script src="./index_files/qrcode-generator.js"></script>
+		
+		
         <script src="./index_files/moment.min.js"></script>
 		<script src="./index_files/bn.js"></script>
 		<script src="./index_files/bitcoinjs-min.js"></script>
 
 		<script src="./index_files/COINS_ARRAY.js"></script>
+		
+		<script src="./index_files/web3-eth-accounts.js">//generate ethereum address from the same hex, corresponding bitcoin priv WIF</script>
+
 
 	</head>
     <body>
@@ -29,8 +37,12 @@ and show you info about prefixes and corresponding coins exists in array.">
 <!-- visualization randomization -->
 	<!-- gif for mouse cursor with random coordinates -->
 		<img id="cursor" title="eventListener onmousemove indication.
-Display when salt changed." style="display: none; position: absolute;" src="./index_files/static/spin.gif"></img>
-
+Display when salt changed."
+		style="display: none; position: absolute; width:64px; heigth:64px; /*by default 64x64 square*/"
+		src = "#">
+			<!--uncomment pathway with your picture for pic.src-->
+		</img>
+		
 		<font title="See more info in the source code sha256_randomize_Math.Random.js">
 			Partial value of salt for modified Math.random() function:
 			<div id="partial_salt_value" style="display: inline; "></div>
@@ -45,8 +57,53 @@ Display when salt changed." style="display: none; position: absolute;" src="./in
            </div>
 		</div>
 
-        <script>
-
+<script>
+		//set spinner gif-image:
+	var pic = document.getElementById("cursor");						//get element with picture
+		//set picture
+	//pic.src = './index_files/static/spinners/old_spin.gif';			//was been 32x32
+	//pic.src = './index_files/static/spinners/old_spin_full.gif';		//good for 64x64	
+	//pic.src = './index_files/static/spinners/numbers_generation.gif';
+	//pic.src = './index_files/static/spinners/hex_generation.gif';
+	//pic.src = './index_files/static/spinners/color_noise.gif';
+	//pic.src = './index_files/static/spinners/color_noise_128x128_2x2.gif';
+	//pic.src = './index_files/static/spinners/white_noise.gif';
+	//pic.src = './index_files/static/spinners/white_noise_64x64.gif';
+	//pic.src = './index_files/static/spinners/dice_generation.gif';
+	//pic.src = './index_files/static/spinners/dice_transparent.gif';
+	//pic.src = './index_files/static/spinners/dice_transparent2.gif';
+	//pic.src = './index_files/static/spinners/dise_with_background.gif';
+	//pic.src = './index_files/static/spinners/square_spin.gif';
+	//pic.src = './index_files/static/spinners/sqruares_moving_spin.gif';
+	//pic.src = './index_files/static/spinners/sqruares_moving2_spin.gif';
+	//pic.src = './index_files/static/spinners/paints_spin.gif';
+	//pic.src = './index_files/static/spinners/Green_spin.gif';
+	//pic.src = './index_files/static/spinners/lawa_spin.gif';
+	//pic.src = './index_files/static/spinners/many_spin.gif';
+	//pic.src = './index_files/static/spinners/new_spin.gif';
+	//pic.src = './index_files/static/spinners/orange_spin.gif';
+	//pic.src = './index_files/static/spinners/cycle_spin.gif';
+	//pic.src = './index_files/static/spinners/water_spin.gif';
+	//pic.src = './index_files/static/spinners/spiral_spin.gif';
+	//pic.src = './index_files/static/spinners/spiral2_spin.gif';
+	//pic.src = './index_files/static/spinners/3d_spin.gif';
+	//pic.src = './index_files/static/spinners/ball_spin.gif';
+	//pic.src = './index_files/static/spinners/Rubic_spin.gif';
+	//pic.src = './index_files/static/spinners/fractal_mechanics.gif';
+	//pic.src = './index_files/static/spinners/slow_spin.gif';
+	//pic.src = './index_files/static/spinners/rainbow_spin.gif';
+	//pic.src = './index_files/static/spinners/snake_spin.gif';
+	//pic.src = './index_files/static/spinners/carbon_wheel.gif';
+	//pic.src = './index_files/static/spinners/finger_spinner_spin.gif';
+	//pic.src = './index_files/static/spinners/metal_finger_spinner_spin.gif';
+	//pic.src = './index_files/static/spinners/hypno_spin.gif';
+	//pic.src = './index_files/static/spinners/sphere_spin.gif';
+	//pic.src = './index_files/static/spinners/jewel_spin.gif';
+	//pic.src = './index_files/static/spinners/diamond_spin.gif';
+	//pic.src = './index_files/static/spinners/bitcoin_spin.gif';
+	pic.src = './index_files/static/spinners/proteine_spin.gif';
+	
+	
 			
 //sha-256 function already exists in bitcoinjs-min.js Crypto
 //and can be called as Crypto.SHA256('string_unicode_supporting')
@@ -241,6 +298,25 @@ multistring <br>\
 		document.getElementById("visibleHash").style.display = "inline";
 		document.getElementById("hiddenHash").style.display = "none";
 		
+		var privs = document.getElementsByClassName("priv_wif");
+		for(i=0; i<privs.length; i++){
+			privs[i].style.display = 'inline-block';
+		}
+		
+		var hidden_wifs = document.getElementsByClassName("hidden_wif");
+		for(i=0; i<hidden_wifs.length; i++){
+			hidden_wifs[i].style.display = 'none';
+		}
+		
+		var WIF_qr_code = document.getElementsByClassName("visible_qr_code");
+		for(i=0; i<WIF_qr_code.length; i++){
+			WIF_qr_code[i].style.display = 'inline';
+		}
+
+		var hidden_qr_code = document.getElementsByClassName("hidden_qr_code");
+		for(i=0; i<hidden_qr_code.length; i++){
+			hidden_qr_code[i].style.display = 'none';
+		}
 		
 	}
 
@@ -252,6 +328,23 @@ multistring <br>\
 		
 		document.getElementById("visibleHash").style.display = "none";
 		document.getElementById("hiddenHash").style.display = "inline";
+
+		var privs = document.getElementsByClassName("priv_wif");
+		for(i=0; i<privs.length; i++){
+			privs[i].style.display = 'none';
+		}
+		var hidden_wifs = document.getElementsByClassName("hidden_wif");
+		for(i=0; i<hidden_wifs.length; i++){
+			hidden_wifs[i].style.display = 'inline-block';
+		}
+		var WIF_qr_code = document.getElementsByClassName("visible_qr_code");
+		for(i=0; i<WIF_qr_code.length; i++){
+			WIF_qr_code[i].style.display = 'none';
+		}
+		var hidden_qr_code = document.getElementsByClassName("hidden_qr_code");
+		for(i=0; i<hidden_qr_code.length; i++){
+			hidden_qr_code[i].style.display = 'inline';
+		}
 	}
         </script>
 
@@ -611,10 +704,56 @@ checkbox_table.innerHTML += '</tr>';
 		var PUBLIC_KEY_VERSION = crypto_data[coin_id]["address_byte"]; 			//get public key byte
 		var PRIVATE_KEY_VERSION = crypto_data[coin_id]["private_key_prefix"]; 	//get private key byte
 
-		return generate_priv_addr(hash, compressed, PUBLIC_KEY_VERSION, PRIVATE_KEY_VERSION);
+		//return generate_priv_addr(hash, compressed, PUBLIC_KEY_VERSION, PRIVATE_KEY_VERSION);
+		
+		var priv_addr = [];	//define empty array
+		if(coin.toLowerCase() === 'eth' || crypto_data[coin_id]["name"] === "Ethereum"){	//if Ethereum, using web3-eth-accounts.js
+				var account = new Web3EthAccounts();
+				
+				var priv0x = '0x0000000000000000000000000000000000000000000000000000000000000000';
+				var priv_keys_i_length = hash.length;
+				var start_position = 2+64-priv_keys_i_length;
+				var nulled_0x_priv = '';
+	
+				nulled_0x_priv = priv0x.substring(0, start_position)+hash;
+					
+				var keyPair = account.privateKeyToAccount(nulled_0x_priv);
+				var pubKey = JSON.parse(JSON.stringify(keyPair.address));		//pub
+				var privKey = JSON.parse(JSON.stringify(keyPair.privateKey));	//priv
+				priv_addr.push(privKey, pubKey);	//push to response
+		}
+		else{
+			priv_addr = generate_priv_addr(hash, compressed, PUBLIC_KEY_VERSION, PRIVATE_KEY_VERSION);
+		}
+		//console.log(priv_addr);
+		//console.log(coin);
+		return priv_addr;
+		
 	}
 
-    $("#generate").click(function() {
+	//This function need to generate qr-code as gif-image and append img tag to inside a-element.
+	function generate_qr_code(aElement, text, width, height){
+		var qrCode = qrcode_gen(8, 'H');							//generate big qr-code with High value of error correction capability 
+		var text2; 													//define temp variable
+		text2 = text.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '');		//replace this characters.
+		if(text2!==text){														//compare text
+			console.log('(replaced text) '+text2+' !== '+text+' (input text)');	//show notification if not equal
+		}
+		
+		qrCode.addData(text);												//generate qr-code from text
+		qrCode.make();														//make this
+		var link = aElement;												//using specified aElement
+		link.innerHTML = qrCode.createImgTag(6);							//append HTML
+		
+		//get value of "src"-attribute for child tag "img" of "link" element and copy to "href"
+		var img = link.getElementsByTagName('img')[0];						//get image element
+		img.width = width;													//change width to specified
+		img.height = height;												//change heigth to specified
+		link.href = img.src;												//add full size base64 qr-code from src to href of aElement
+	}
+	//end function to generate gif qr-code.
+
+	$("#generate").click(function() {
 		if(document.getElementById('Passphrase').value===''){ //if passphrase field empty
 			hash(); //regenerate pass and hash
 		}
@@ -685,13 +824,69 @@ checkbox_table.innerHTML += '</tr>';
             });
 
             $('#wallets').append(wallet);
-            $("#" + coin + " .pub.qr").qrcode({render: 'canvas', width: 112, height: 112, text: address});
-            $("#" + coin + " .priv.qr").qrcode({render: 'canvas', width: 112, height: 112, text: wif});
+			
+
+
+
+/*
+			//qr-code as gif file in img tag
+			var aElement_pub = $("#" + coin + " .pub.qr.link");
+			aElement_pub.attr("id", coin+'_pub_qr');											//add ID for aElement_pub
+			aElement_pub.attr("download", coin+'_pub_qr_code'+'.gif');							//set filename
+			generate_qr_code(document.getElementById(coin+'_pub_qr'), address, 128, 128);		//getElementById, text, witdth, heigth
+			
+			var aElement_priv = $("#" + coin + " .priv.qr.link");
+			aElement_priv.attr("id", coin+'_priv_qr');											//add ID for aElement_priv
+			aElement_priv.attr("download", coin+'_priv_qr_code'+'.gif');
+			generate_qr_code(document.getElementById(coin+'_priv_qr'), wif, 128, 128);			//getElementById, text, witdth, heigth
+*/
+	
+
+
+			//qrcode as PNG-picture, which is good readable by qr-code scanners
+			//This downloaded from canvas, so canvas is displaing full size.
+			
+			$("#" + coin + " .pub.qr.link").qrcode(
+				{
+					render: 'canvas',
+					width: 256,
+					height: 256,
+					text: address,
+					id: coin+'_pub_qr_code'
+				}
+			);
+			
+			$("#" + coin + " .pub.qr.link").attr("href", document.getElementById(coin+'_pub_qr_code').toDataURL("image/png"));
+			$("#" + coin + " .pub.qr.link").attr("download", coin+'_pub_qr_code'+'.png');
+			$("#" + coin+'_pub_qr_code').addClass("zoom");
+			
+            $("#" + coin + " .priv.qr.link").qrcode(
+				{
+					render: 'canvas',
+					width: 256,
+					height: 256,
+					text: wif,
+					id: coin+'_priv_qr_code'
+				}
+			);
+			
+			$("#" + coin + " .priv.qr.link").attr("href", document.getElementById(coin+'_priv_qr_code').toDataURL("image/png"));
+			$("#" + coin + " .priv.qr.link").attr("download", coin+'_priv_qr_code'+'.png');
+			$("#" + coin+'_priv_qr_code').addClass("zoom");
+			
+			//$("#" + coin+'_priv_qr_code').attr('width', 112);
+			//$("#" + coin+'_priv_qr_code').attr('height', 112);
+			//canvas cann't be resized, after drawing.
+
+			
+			
         });
+		
         $("#wallets").show();
+		hide_sidebar();
     });
 
-    function render_template(context) {
+ function render_template(context) {
         var contents = $("#paper_wallet_template").html();
         
         contents = contents.replace(/{{ name }}/g, context.name);
@@ -701,7 +896,7 @@ checkbox_table.innerHTML += '</tr>';
         contents = contents.replace(/{{ code }}/g, context.code);
         
         return contents
-    }
+    } 
 </script>
 
 
@@ -709,7 +904,10 @@ checkbox_table.innerHTML += '</tr>';
     <table class="wide" id="{{ code }}">
         <tr class="no_border">
             <td class="no_border">
-                <div class="pub qr" title="Address QR-code"></div>
+                <div title="Address QR-code.">
+					<a class="pub qr link" href="#" download="coin_pub.png">
+					</a>
+				</div>
             </td>
             <td class="no_border">
                 <div class="title">
@@ -717,10 +915,26 @@ checkbox_table.innerHTML += '</tr>';
                     <img src="./index_files/static/{{ logo }}" style="width: 50px; height: 50px" title="To make icons 100x100 you can using photo resizer, like this: http://picasion.com/create-avatar/">
                 </div>
                 <div class="pub words">&larr; Address (receive): {{ address }} </div>
-                <div class="priv words">Private Key (spend): {{ wif }} &rarr;</div>
+                <div class="priv words">Private Key (spend):
+					<div class="priv_wif" style="display:inline-block;" onclick="hide_sidebar();">
+						{{ wif }}
+					</div>
+					<div class="hidden_wif" style="display:none;" onclick="show_sidebar();">
+						***HIDDEN*********************HIDDEN*********************HIDDEN***
+					</div>
+					&rarr;
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				</div>
             </td>
             <td class="no_border">
-                <div class="priv qr" style="width: 112px; height: 112px" title="Private key QR-code."></div>
+				<div class="hidden_qr_code" style="display:none; width:112px; height:112px" onclick="hide_sidebar();">
+					<img src="./index_files/static/hidden_qr_512x512.png" class="zoom" title="QR-code is hidden. Click on priv to show.">
+				</div>
+                <div class="visible_qr_code" style="display:inline-block; width:112px; height:112px" title="Private key QR-code." onclick="show_sidebar();">
+					<a class="priv qr link" href="#" download="coin_priv.png">
+					</a>
+				</div>
             </td>
         </tr>
     </table>
@@ -730,4 +944,7 @@ checkbox_table.innerHTML += '</tr>';
 
         <section id="footer">
         </section>
-</body></html>
+</body>
+<hr>
+<div align="center">To sign messages and verify signatures, you can using <a href="https://username1565.github.io/brainwallet.github.io/#sign">this client-side script</a> (just select in dropdown menu or set there - your coin).</div>
+</html>

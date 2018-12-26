@@ -558,7 +558,7 @@ function onMouseMove(e) {
 
 	//put on right side on the page
 	cursor.style.top = y + "px";							//move to y coordinate
-	cursor.style.left = window.innerWidth-64 + "px";		//right current window width
+	cursor.style.left = window.innerWidth-82 + "px";		//right current window width
 
 	
 	//randomize cursor coordinates, using window.Crypto.getRandomValues(bytearray);
@@ -593,18 +593,18 @@ function move_to_right_top(){ //for first page loading page
 	//variable first_ran = true;
 	
 	if(
-		cursor.style.display.top !== window.innerWidth-64 + "px"
+		cursor.style.display.top !== window.innerWidth-82 + "px"
 	&&	cursor.style.top !== 0 + "px"
 	)
 	{
 		//make image visible.
 		cursor.style.display = "block";
 		//move image in the end and bottom of page
-		//cursor.style.left = window.innerWidth-64 + "px";		//right current window width
+		//cursor.style.left = window.innerWidth-82 + "px";		//right current window width
 		//cursor.style.top = window.innerHeight-32 + "px";		//bottom current window Height
 	
 		//move image in the end and top of page (resizing available)
-		//cursor.style.left = window.innerWidth-64 + "px";		//right current window width
+		//cursor.style.left = window.innerWidth-82 + "px";		//right current window width
 		//cursor.style.top = 0 + "px";							//top, current window Height = 0;
 	
 		//do this slowly.
@@ -660,10 +660,10 @@ if(cursor!==null){ //if this element was geen founded
 	
 	//set rand coordinates
 	//randomize cursor coordinates, using window.Crypto.getRandomValues(bytearray);
-	//cursor.style.left = getRandomInt_window_crypto(0, window.innerWidth-64) + "px";		//using random width in currend window size (without picture size)
+	//cursor.style.left = getRandomInt_window_crypto(0, window.innerWidth-82) + "px";		//using random width in currend window size (without picture size)
 	//cursor.style.top = getRandomInt_window_crypto(0, window.innerHeight-32) + "px";		//using random height values (window resising available)
 	
-	cursor.style.left = window.innerWidth-64 + "px";		//using random width in currend window size (without picture size)
+	cursor.style.left = window.innerWidth-82 + "px";		//using random width in currend window size (without picture size)
 	cursor.style.top = 0 + "px";		//using random height values (window resising available)
 	
 	timeout2 = setTimeout( stopped , 500); //timeout to hide div when page reloaded, without moving cursor
